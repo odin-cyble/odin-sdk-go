@@ -1,6 +1,6 @@
-# Odin SDK For Go
+# Odin SDK v2 for Go
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/cybledev/odin-sdk-go.svg)](https://pkg.go.dev/github.com/cybledev/odin-sdk-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/cybledev/odin-sdk-go.svg)](https://pkg.go.dev/github.com/cybledev/odin-sdk-go@v2)
 
 ODIN's primary focus is to equip infosec teams with a precise depiction of the internet, enabling them to strengthen their security defences and proactively detect threats within their attack surface.
 
@@ -11,64 +11,37 @@ The Odin SDK for Go provides a simple way to interact with the [Odin API](https:
 To use the Odin SDK in your Go project, you need to install it using the `go get` command:
 
 ```bash
-go get github.com/cybledev/odin-sdk-go
+go get github.com/cybledev/odin-sdk-go@v2
 ```
 
 ## Usage
 
 Import the package into your Go code and create an instance of the `odin.APIClient` by providing the base API URL and your API key:
+
 ```golang
-import github.com/cybledev/odin-sdk-go
+import github.com/cybledev/odin-sdk-go@v2
 
-client := odin.NewAPIClient("https://api.getodin.com/v1", "<APIKey>")
+func ApiKeyAuth() runtime.ClientAuthInfoWriter {
+    return runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
+        return r.SetHeaderParam("x-api-key", os.Getenv("<APIKey>"))
+     })
+}
+
+limit := int64(1)
+query := models.CertificateCertSearchRequest{
+    Limit: &limit,
+    Query: "certificate.subject_alt_name.dns_names:'cloudflare.com' AND certificate.validity.not_after:\"2024-09-20T18:19:24\"",
+}
+params := certificate.NewPostV1CertificatesSearchParamsWithContext(ctx).WithQuery(&query)
+resp, err := client.Certificate.PostV1CertificatesSearch(params, apiKeyAuth())
 ```
-
-## APIs and Response Types
-
-| API                       | Request Type              | Response Type              |
-|---------------------------|---------------------------|----------------------------|
-| GetCertificateCount       | string                    | CertificateCountResponse   |
-| GetCertificateHashDetails | string                    | CertificateDetailsResponse |
-| GetHostsIpDetails         | string                    | HostDetailsResponse        |
-| GetHostsIpCVEDetails      | string                    | IpCveResponse              |
-| GetCertificatesSummary    | CertificateSummaryRequest | CertificateSummaryResponse |
-| GetHostsCount             | string                    | HostCountResponse          |
-| GetHostsSummary           | HostsSummaryRequest       | HostsSummaryResponse       |
-| SearchCertificates        | CertificateSearchRequest  | CertificateSearchResponse  |
-| SearchHosts               | HostsSearchRequest        | HostsSearchResponse        |
-
-
-
 
 ## Examples
 
-Here is the [Example](https://github.com/cybledev/odin-sdk-go/tree/main/examples), you can find various usage examples demonstrating how to interact with the Odin API using the `odin-sdk-go` package.
+Here is the [Example](https://github.com/cybledev/odin-sdk-go/tree/odin/odin_client_test.go), you can find various usage examples demonstrating how to interact with the Odin API using the `odin-sdk-go` package.
 
-Each example is a standalone Go program that showcases specific functionalities of the SDK.
-
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/cybledev/odin-sdk-go"
-)
-
-func main() {
-	client := odin.NewAPIClient("https://api.getodin.com/v1", "<APIKey>")
-	resp, err := client.GetHostsCount("services.port:80")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(resp.Success)
-	fmt.Println(resp.Data.Count)
-}
-```
-
-Make sure to replace `<APIKey>` with your actual Odin API key. 
-
+Make sure to replace `<APIKey>` with your actual [Odin API key from the odin dashboard](https://odin.io/account/profile/api-keys).
 
 Thank you for using the Odin SDK for Go. If you encounter any issues, find a bug, or want to contribute, feel free to open an issue or submit a pull request. Your feedback and contributions are highly appreciated!
 
-For more information about our other projects and services, visit our website at https://www.getodin.com.
+For more information about our other projects and services, visit our website at <https://www.odin.io>.
