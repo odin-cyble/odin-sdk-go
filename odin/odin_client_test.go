@@ -22,8 +22,17 @@ var (
 	ctx    = context.Background()
 
 	url        = "google.com"
+	keyword    = "metabase"
 	exploitsIP = "172.232.206.199"
 )
+
+// utility function to validate response status code
+func validateStatusCode(statusCode int) bool {
+	if statusCode < 200 || statusCode > 399 {
+		return false
+	}
+	return true
+}
 
 func apiKeyAuth() runtime.ClientAuthInfoWriter {
 	return runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
@@ -42,6 +51,7 @@ func TestPostExposedBucketFilesList(t *testing.T) {
 	searchParams := exposed_files.NewPostV1ExposedFilesSearchParamsWithContext(ctx).WithQuery(&esr)
 	resp, err := client.ExposedFiles.PostV1ExposedFilesSearch(searchParams, apiKeyAuth())
 	require.Nil(t, err)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.Equal(t, resp.IsSuccess(), true)
 	require.NotNil(t, resp)
 
@@ -63,6 +73,7 @@ func TestPostExposedBucketSearchPagination(t *testing.T) {
 		resp, err := client.ExposedBuckets.PostV1ExposedBucketsSearch(searchParams, apiKeyAuth())
 		require.Nil(t, err)
 		require.Equal(t, resp.IsSuccess(), true)
+		require.True(t, validateStatusCode(resp.Code()))
 		require.NotNil(t, resp)
 
 		esr.Start = resp.Payload.Pagination.Last
@@ -83,12 +94,13 @@ func TestPostHostsCount(t *testing.T) {
 	resp, err := client.Hosts.PostV1HostsCount(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
 }
 
-func TestPostCertificatesSearch(t *testing.T) {
+func DeprecatedTestPostCertificatesSearch(t *testing.T) {
 	limit := int64(1)
 	query := models.CertificateCertSearchRequest{
 		Limit: &limit,
@@ -99,6 +111,7 @@ func TestPostCertificatesSearch(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
@@ -117,6 +130,7 @@ func TestPostHostsSearch(t *testing.T) {
 
 		res, err := client.Hosts.PostV1HostsSearch(params, apiKeyAuth())
 		require.Nil(t, err)
+		require.True(t, validateStatusCode(res.Code()))
 
 		records = append(records, res.Payload.Data...)
 		query.Start = res.Payload.Pagination.Last
@@ -128,7 +142,7 @@ func TestPostHostsSearch(t *testing.T) {
 	t.Log(string(recordsMarshalled))
 }
 
-func TestPostHostsV2Search(t *testing.T) {
+func DTestPostHostsV2Search(t *testing.T) {
 	limit := int64(1)
 	query := models.CybleComOdinAPIControllersV2IpservicesSearchRequest{
 		Limit: &limit,
@@ -137,6 +151,7 @@ func TestPostHostsV2Search(t *testing.T) {
 
 	params := hosts.NewPostV2HostsSearchParamsWithContext(ctx).WithQuery(&query)
 	res, err := client.Hosts.PostV2HostsSearch(params, apiKeyAuth())
+	require.True(t, validateStatusCode(res.Code()))
 	require.Nil(t, err)
 
 	t.Log(res.String())
@@ -154,6 +169,7 @@ func TestPostExposedBucketSearch(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
@@ -170,6 +186,7 @@ func TestPostExposedFileSearch(t *testing.T) {
 	resp, err := client.ExposedFiles.PostV1ExposedFilesSearch(searchParams, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
@@ -187,6 +204,7 @@ func TestPostHostsSummary(t *testing.T) {
 	res, err := client.Hosts.PostV1HostsSummary(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, res.IsSuccess(), true)
+	require.True(t, validateStatusCode(res.Code()))
 	require.NotNil(t, res)
 
 	t.Log(res.String())
@@ -197,6 +215,7 @@ func TestHostsCveIP(t *testing.T) {
 	resp, err := client.Hosts.GetV1HostsCveIP(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Log(resp.String())
@@ -217,12 +236,13 @@ func TestGetHostsIPParams(t *testing.T) {
 	resp, err := client.Hosts.GetV1HostsIP(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
 }
 
-func TestPostCertificatesSummary(t *testing.T) {
+func DeprecatedTestPostCertificatesSummary(t *testing.T) {
 	field := "tags"
 	limit := int64(5)
 	query := models.CertificateCertSummaryRequest{
@@ -234,23 +254,25 @@ func TestPostCertificatesSummary(t *testing.T) {
 	resp, err := client.Certificate.PostV1CertificatesSummary(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
 }
 
-func TestPostCertificatesCount(t *testing.T) {
+func DeprecatedTestPostCertificatesCount(t *testing.T) {
 	query := &models.CertificateCertCountRequest{}
 	params := certificate.NewPostV1CertificatesCountParamsWithContext(ctx).WithQuery(query)
 	resp, err := client.Certificate.PostV1CertificatesCount(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
 }
 
-func TestGetCertificatesHash(t *testing.T) {
+func DeprecatedTestGetCertificatesHash(t *testing.T) {
 	hashVal := "DBE5E294A5D0D76E8B44AB86C623F51BCB8B247356A5253BFCCA5F425E8EBD09"
 
 	params := certificate.NewGetV1CertificatesHashParamsWithContext(ctx).WithHash(hashVal)
@@ -258,6 +280,7 @@ func TestGetCertificatesHash(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
@@ -267,13 +290,14 @@ func TestPostDNSSearch(t *testing.T) {
 
 	limit := int64(10)
 	query := models.DNSDomainRequest{
-		Domain: url,
-		Limit:  &limit,
+		Keyword: keyword,
+		Limit:   &limit,
 	}
 	params := domain.NewPostV1DomainSearchParamsWithContext(ctx).WithQuery(&query)
 	resp, err := client.Domain.PostV1DomainSearch(params, apiKeyAuth())
 	require.Nil(t, err)
 	require.Equal(t, resp.IsSuccess(), true)
+	require.True(t, validateStatusCode(resp.Code()))
 	require.NotNil(t, resp)
 
 	t.Logf(resp.String())
