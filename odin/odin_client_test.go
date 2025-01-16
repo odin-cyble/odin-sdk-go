@@ -23,8 +23,31 @@ var (
 
 	url        = "google.com"
 	keyword    = "metabase"
-	exploitsIP = "172.232.206.199"
+	exploitsIP string
 )
+
+func TestMain(m *testing.M) {
+	limit := int64(1)
+	query := models.SearchRequest{
+		Limit: &limit,
+		Query: "services.port:80",
+	}
+
+	params := hosts.NewPostV1HostsSearchParamsWithContext(ctx).WithQuery(&query)
+	res, err := client.Hosts.PostV1HostsSearch(params, apiKeyAuth())
+	if err != nil {
+		panic("Failed to initialize test IP: " + err.Error())
+	}
+
+	if len(res.Payload.Data) == 0 {
+		panic("No IP addresses found from hosts search")
+	}
+
+	exploitsIP = res.Payload.Data[0].IP
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 // utility function to validate response status code
 func validateStatusCode(statusCode int) bool {

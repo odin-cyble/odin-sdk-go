@@ -651,7 +651,7 @@ type PostV1HostsSearchOKBody struct {
 	models.APIResponse
 
 	// data
-	Data []*models.IpservicesIPSummaryData `json:" data"`
+	Data []*models.IpservicesIPSummaryData `json:"data"`
 
 	// pagination
 	Pagination *models.SearchPagination `json:"pagination,omitempty"`
@@ -668,7 +668,7 @@ func (o *PostV1HostsSearchOKBody) UnmarshalJSON(raw []byte) error {
 
 	// PostV1HostsSearchOKBodyAO1
 	var dataPostV1HostsSearchOKBodyAO1 struct {
-		Data []*models.IpservicesIPSummaryData `json:" data"`
+		Data []*models.IpservicesIPSummaryData `json:"data"`
 
 		Pagination *models.SearchPagination `json:"pagination,omitempty"`
 	}
